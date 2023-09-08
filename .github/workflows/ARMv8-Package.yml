@@ -78,7 +78,7 @@ jobs:
       with:
         openwrt_path: openwrt/bin/targets/*/*/*rootfs.tar.gz
         openwrt_board: panther-x2
-        openwrt_kernel: 5.15.13_6.1.5
+        openwrt_kernel: 6.1.52
         openwrt_size: 2048
         auto_kernel: true
         kernel_repo: ophub/kernel
