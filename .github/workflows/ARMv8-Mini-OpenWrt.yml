@@ -77,6 +77,7 @@ jobs:
     - name: Install Feeds
       run: |
         cd $OPENWRT_PATH
+        sed -i '$a src-git small https://github.com/631894570/small-package' feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
