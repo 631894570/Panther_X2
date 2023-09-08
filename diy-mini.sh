@@ -20,7 +20,7 @@ cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/
 
 
 #修改TTYD自动登录
-sed -i 's/login/login -f root/g' openwrt/feeds/packages/utils/ttyd/files/ttyd.config
+sed -i 's/login/login -f root/g' feeds/packages/utils/ttyd/files/ttyd.config
 
 #替换banner
 rm -rf package/base-files/files/etc/banner
