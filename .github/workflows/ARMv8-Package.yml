@@ -74,11 +74,11 @@ jobs:
 
     - name: Package OpenWrt Firmware
       if: steps.download.outputs.status == 'success'
-      uses: xiaomeng9597/amlogic-s9xxx-openwrt@main
+      uses: ophub/amlogic-s9xxx-openwrt@main
       with:
         openwrt_path: openwrt/bin/targets/*/*/*rootfs.tar.gz
         openwrt_board: panther-x2
-        openwrt_kernel: 6.1.52
+        openwrt_kernel: 6.1.52_6.1.45_5.15.127
         openwrt_size: 2048
         auto_kernel: true
         kernel_repo: ophub/kernel
