@@ -18,6 +18,22 @@ sed -i "s/${orig_version}/R${date_version} by Haiibo/g" package/lean/default-set
 # 修复 hostapd 报错
 cp -f $GITHUB_WORKSPACE/scripts/011-fix-mbo-modules-build.patch package/network/services/hostapd/patches/011-fix-mbo-modules-build.patch
 
-sed -i '$a src-git small https://github.com/631894570/small-package' feeds.conf.default
+
+#修改TTYD自动登录
+sed -i 's/login/login -f root/g' openwrt/feeds/packages/utils/ttyd/files/ttyd.config
+
+#替换banner
+rm -rf package/base-files/files/etc/banner
+curl -o package/base-files/files/etc/banner https://raw.githubusercontent.com/631894570/openwrt/main/banner
+
+# Modify default IP
+sed -i 's/192.168.1.1/192.168.10.10/g' package/base-files/files/bin/config_generate
+
+# Clear the login password
+sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/lean/default-settings/files/zzz-default-settings
+
+#4.默认主题
+sed -i 's/luci-theme-bootstrap/luci-theme-design/g' feeds/luci/collections/luci/Makefile
+
 ./scripts/feeds update -a
 ./scripts/feeds install -a
