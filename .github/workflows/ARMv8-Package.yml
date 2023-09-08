@@ -6,7 +6,7 @@
 # https://github.com/haiibo
 #===============================================
 
-name: ARMv8 Package panther-x2
+name: ARMv8-Package
 
 on:
   workflow_dispatch:
