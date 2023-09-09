@@ -35,5 +35,10 @@ sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/lean/default-settings/f
 #4.默认主题
 sed -i 's/luci-theme-bootstrap/luci-theme-design/g' feeds/luci/collections/luci/Makefile
 
+#开启netdata sensors
+sed '8a\-# sensors=force' feeds/packages/admin/netdata/patches/001-disable-plugins-by-default.patch
+sed '9a\+sensors=force' feeds/packages/admin/netdata/patches/001-disable-plugins-by-default.patch
+sed -i 's/charts.d = no/charts.d = yes/g' packages/admin/netdata/files/netdata.conf
+
 ./scripts/feeds update -a
 ./scripts/feeds install -a
