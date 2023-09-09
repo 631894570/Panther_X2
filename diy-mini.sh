@@ -36,7 +36,6 @@ sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/lean/default-settings/f
 sed -i 's/luci-theme-bootstrap/luci-theme-design/g' feeds/luci/collections/luci/Makefile
 
 #开启netdata sensors
-sed -i 'N;8a+sensors=force' feeds/packages/admin/netdata/patches/001-disable-plugins-by-default.patch
 sed -i 's/charts.d = no/charts.d = yes/g' feeds/packages/admin/netdata/files/netdata.conf
 
 ./scripts/feeds update -a
