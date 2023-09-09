@@ -223,9 +223,9 @@ jobs:
       if: steps.download.outputs.status == 'success'
       uses: ophub/amlogic-s9xxx-openwrt@main
       with:
-        openwrt_path: openwrt/bin/targets/*/*/*rootfs.tar.gz
+        openwrt_path: openwrt-armvirt/*rootfs.tar.gz
         openwrt_board: panther-x2
-        openwrt_kernel: 6.1.52
+        openwrt_kernel: 5.15.13_6.1.5
         openwrt_size: 2048
         auto_kernel: true
         kernel_repo: ophub/kernel
