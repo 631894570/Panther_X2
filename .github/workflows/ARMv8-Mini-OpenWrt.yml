@@ -37,7 +37,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    - name: Check Server Performance
+    - name: 检查服务器配置
       run: |
         echo "警告⚠"
         echo "分配的服务器性能有限，若选择的插件过多，务必注意CPU性能！"
@@ -51,7 +51,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l)" && df -hT
 
-    - name: Initialization Environment
+    - name: 配置编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -63,7 +63,7 @@ jobs:
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
 
-    - name: Clone Source Code
+    - name: 下载源代码
       id: clone
       run: |
         df -hT $GITHUB_WORKSPACE
@@ -74,14 +74,14 @@ jobs:
         echo "VERSION_INFO=$VERSION_INFO" >> $GITHUB_ENV
         echo "VERSION_INFO=$(echo $VERSION_INFO)" >> $GITHUB_OUTPUT
 
-    - name: Install Feeds
+    - name: 加载feeds
       run: |
         cd $OPENWRT_PATH
         sed -i '$a src-git small https://github.com/631894570/small-package' feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Load Custom Configuration
+    - name: 加载自定义配置
       run: |
         [ -e files ] && mv files $OPENWRT_PATH/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE $OPENWRT_PATH/.config
@@ -91,7 +91,7 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_SCRIPT
         $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
 
-    - name: Download DL Package
+    - name: make download package
       run: |
         cd $OPENWRT_PATH
         make defconfig
@@ -99,7 +99,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Generate Variables
+    - name: 变量赋值
       run: |
         cd $OPENWRT_PATH
         SOURCE_REPO=$(echo $REPO_URL | awk -F '/' '{print $(NF)}')
@@ -109,7 +109,7 @@ jobs:
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}')
         echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
 
-    - name: Compile Packages
+    - name: 编译
       run: |
         cd $OPENWRT_PATH
         echo -e "$(nproc) thread compile"
@@ -120,7 +120,7 @@ jobs:
         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j1 V=s IGNORE_ERRORS=1
         make package/index
 
-    - name: Generate Firmware
+    - name: 生成ROOTFS
       id: generate
       run: |
         cd $OPENWRT_PATH
@@ -133,18 +133,18 @@ jobs:
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "FILE_DATE=$(date +"%Y.%m.%d")" >> $GITHUB_ENV
 
-    - name: Check Space Usage
+    - name: 查看剩余磁盘
       if: always()
       run: df -hT
 
-    - name: Upload Bin Directory
+    - name: 上传bin目录
       if: steps.generate.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.SOURCE_REPO }}-bin-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
         path: ${{ env.OPENWRT_PATH }}/bin
 
-    - name: Organize Files
+    - name: 整理文件
       if: steps.generate.outputs.status == 'success'
       run: |
         cd $OPENWRT_PATH/bin/targets/*/*
@@ -155,18 +155,18 @@ jobs:
         rm -rf packages feeds.buildinfo version.buildinfo
         echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
 
-    - name: Upload Firmware To Artifact
+    - name: 上传固件目录
       if: steps.generate.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
       uses: actions/upload-artifact@main
       with:
         name: ${{ env.SOURCE_REPO }}-firmware-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}-${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE_PATH }}
 
-    - name: Upload Firmware To Release
+    - name: 上传rootfs到releases
       if: steps.generate.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
-        name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
+        name: ARMv8${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
         allowUpdates: true
         tag: ${{ env.FIRMWARE_TAG }}
         token: ${{ secrets.GITHUB1_TOKEN }}
@@ -177,6 +177,15 @@ jobs:
           直刷固件参见 Tag 名为 ARMv8_MINI 的 Releases
           当前使用版本:【编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录】
           ${{ env.VERSION_INFO }}
+    - name: 移除releases旧固件
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 1
+        delete_tags: true
+        delete_tag_pattern: ARMv8
+      env:
+        GITHUB1_TOKEN: ${{ secrets.GITHUB1_TOKEN }}
 
   Package:
     needs: [Build]
@@ -189,7 +198,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    - name: Initialization Environment
+    - name: 配置编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -210,7 +219,7 @@ jobs:
         echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "DATE1=$(date +"%y.%m.%d")" >> $GITHUB_ENV
 
-    - name: Package OpenWrt Firmware
+    - name: 打包img固件
       if: steps.download.outputs.status == 'success'
       uses: ophub/amlogic-s9xxx-openwrt@main
       with:
@@ -221,20 +230,20 @@ jobs:
         auto_kernel: true
         kernel_repo: ophub/kernel
 
-    - name: Upload OpenWrt To Artifact
+    - name: 上传固件目录
       if: env.PACKAGED_STATUS == 'success' && env.OPENWRT_RELEASE != 'true'
       uses: kittaakos/upload-artifact-as-is@master
       with:
         path: ${{ env.PACKAGED_OUTPUTPATH }}
 
-    - name: Upload OpenWrt To Release
+    - name: 上传img固件到releases
       if: env.PACKAGED_STATUS == 'success' && env.OPENWRT_RELEASE == 'true'
       uses: ncipollo/release-action@v1
       with:
-        name: R${{ env.DATE }} for ${{ env.OPENWRT_TAG }}
+        name: Panther_X2_${{ env.DATE }} for ${{ env.OPENWRT_TAG }}
         allowUpdates: true
         removeArtifacts: true
-        tag: ${{ env.OPENWRT_TAG }}
+        tag: Panther_X2_${{ env.OPENWRT_TAG }}
         token: ${{ secrets.GITHUB1_TOKEN }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
@@ -246,3 +255,19 @@ jobs:
           常见问题及注意事项请参考恩山F大➦[最新帖](https://www.right.com.cn/forum/thread-4076037-1-1.html)
           当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
           ${{ env.VERSION_INFO }}
+    - name: 移除releases旧固件
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        keep_latest: 1
+        delete_tags: true
+        delete_tag_pattern: Panther_X2
+      env:
+        GITHUB1_TOKEN: ${{ secrets.GITHUB1_TOKEN }}
+    - name: 删除工作流运行
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        token: ${{ github.token }}
+        repository: ${{ github.repository }}
+        retain_days: 1
+        keep_minimum_runs: 0
