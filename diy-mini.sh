@@ -41,6 +41,5 @@ rm -rf feeds/packages/admin/netdata/patches/001-disable-plugins-by-default.patch
 wget https://raw.githubusercontent.com/631894570/Panther_X2/main/001-disable-plugins-by-default.patch -O feeds/packages/admin/netdata/patches/001-disable-plugins-by-default.patch
 
 
-替换
 ./scripts/feeds update -a
 ./scripts/feeds install -a
