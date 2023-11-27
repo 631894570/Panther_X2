@@ -255,6 +255,7 @@ jobs:
           elif [[ "${{ inputs.source_branch }}" == *"istoreos"* ]]; then
               REPO_URL="https://github.com/istoreos/istoreos"
               TAGS_NAME="iStoreOS"
+              REPO_BRANCH="istoreos-22.03"
           else
               echo "Unknown source code repository."
               exit 1
