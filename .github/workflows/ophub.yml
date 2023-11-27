@@ -199,10 +199,10 @@ on:
           - yccz
 
 env:
-  FEEDS_CONF: config/${{ inputs.source_branch }}/feeds.conf.default
-  CONFIG_FILE: config/${{ inputs.source_branch }}/config
-  DIY_P1_SH: config/${{ inputs.source_branch }}/diy-part1.sh
-  DIY_P2_SH: config/${{ inputs.source_branch }}/diy-part2.sh
+  FEEDS_CONF: ${{ inputs.source_branch }}/feeds.conf.default
+  CONFIG_FILE: ${{ inputs.source_branch }}/config
+  DIY_P1_SH: ${{ inputs.source_branch }}/diy-part1.sh
+  DIY_P2_SH: ${{ inputs.source_branch }}/diy-part2.sh
   TZ: Asia/Shanghai
 
 jobs:
