@@ -254,7 +254,6 @@ jobs:
               TAGS_NAME="immortalwrt"
           elif [[ "${{ inputs.source_branch }}" == *"istoreos"* ]]; then
               REPO_URL="https://github.com/istoreos/istoreos"
-              REPO_BRANCH="default"
               TAGS_NAME="iStoreOS"
           else
               echo "Unknown source code repository."
